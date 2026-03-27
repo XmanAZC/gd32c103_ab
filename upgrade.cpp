@@ -11,12 +11,11 @@
 #include <vector>
 #include <signal.h>
 
-#include "xlink_generator/xlink.h"
-#include "xlink_generator/xlink_port_posix.h"
-#include "xlink_generator/xlink_port_stdlib.h"
-#include "xlink_generator/xlink_upgrade.h"
-#include "xlink_generator/xlink_control.h"
-#include "inc/partition.h"
+#include "xlink.h"
+#include "xlink_port_posix.h"
+#include "xlink_port_stdlib.h"
+#include "xlink_upgrade.h"
+#include "partition.h"
 
 using namespace std;
 
@@ -92,7 +91,7 @@ class upgrade_partition
 {
 public:
     upgrade_partition(xlink_partition_type_t type, xlink_context_p context, int fd)
-        : partition_type(type), ctx(context)
+        : ctx(context), partition_type(type)
     {
         switch (partition_type)
         {
@@ -176,11 +175,11 @@ public:
     }
 
 private:
-    xlink_partition_type_t partition_type;
-    string partition_name;
     uint32_t start_address;
     uint32_t size_bytes;
+    string partition_name;
     xlink_context_p ctx;
+    xlink_partition_type_t partition_type;
     vector<uint8_t> firmware_data;
 
     const size_t chunk_size = 200;
@@ -461,6 +460,12 @@ int main(int argc, char *const *argv)
     }
 
     printf("Firmware upgrade completed successfully\n");
+
+    printf("Reset the device to boot into the new firmware\n");
+
+    xlink_upgrade_restart_device_send(ctx, true);
+
+    tcflush(serial_fd, TCIOFLUSH);
 
 __close_frimware_fd:
     close(firmware_fd);
