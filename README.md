@@ -11,6 +11,8 @@ git submodule update --init --recursive
 ```
 下载交叉编译工具。
 ```bash
+sudo apt update
+sudo apt install build-essential gcc g++ cmake wget ninja-build usbutils
 wget https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
 mkdir -p ~/software
 tar xf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2 -C ~/software/
