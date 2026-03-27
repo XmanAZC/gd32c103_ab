@@ -17,8 +17,10 @@ static void live_led_task(void *parameters) __attribute__((noreturn));
 
 static void xlinkTask(void *parameters) __attribute__((noreturn));
 
-static void initTask(void)
+static void initTask(void *parameters)
 {
+    (void)parameters;
+
     uart_init();
 
     (void)xTaskCreate(xlinkTask,

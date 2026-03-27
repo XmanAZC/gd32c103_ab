@@ -1,5 +1,5 @@
 {
-    "project_name": "chada",
+    "project_name": "gd32c103_ab",
     "imports": [
         "upgrade.json"
     ]
