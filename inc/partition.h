@@ -12,7 +12,7 @@ extern "C"
     /*
      * | Bootloader | Bootfrom | APP_A_INFO | APP_A | APP_B_INFO | APP_B | Params |
      * | ---------- | -------- | ---------- | ----- | ---------- | ----- | ------ |
-     * | 16KB       | 2KB      | 2KB        | 48KB  | 2KB        | 48KB  | 8KB    |
+     * | 16KB       | 2KB      | 2KB        | 48KB  | 2KB        | 48KB  | 10KB   |
      */
 
     enum Partition
@@ -208,16 +208,10 @@ extern "C"
         app_entry();             /* jump to app */
     }
 
-    void reboot(void)
-    {
-        void NVIC_SystemReset(void);
-        NVIC_SystemReset();
-    }
-
-#endif
+#endif /* SOC_GD32C103CBT6 */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _PATRITION_H_
+#endif // _PARTITION_H_
