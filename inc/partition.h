@@ -12,7 +12,7 @@ extern "C"
     /*
      * | Bootloader | Bootfrom | APP_A_INFO | APP_A | APP_B_INFO | APP_B | Params |
      * | ---------- | -------- | ---------- | ----- | ---------- | ----- | ------ |
-     * | 16KB       | 2KB      | 2KB        | 48KB  | 2KB        | 48KB  | 10KB   |
+     * | 4KB        | 2KB      | 2KB        | 50KB  | 2KB        | 50KB  | 18KB   |
      */
 
     enum Partition
@@ -29,13 +29,13 @@ extern "C"
 
     enum PartitionSize
     {
-        PARTITION_SIZE_BOOTLOADER = 16 * 1024,
+        PARTITION_SIZE_BOOTLOADER = 4 * 1024,
         PARTITION_SIZE_BOOTFROM = 2 * 1024,
         PARTITION_SIZE_APP_A_INFO = 2 * 1024,
-        PARTITION_SIZE_APP_A = 48 * 1024,
+        PARTITION_SIZE_APP_A = 50 * 1024,
         PARTITION_SIZE_APP_B_INFO = 2 * 1024,
-        PARTITION_SIZE_APP_B = 48 * 1024,
-        PARTITION_SIZE_PARAMS = 10 * 1024
+        PARTITION_SIZE_APP_B = 50 * 1024,
+        PARTITION_SIZE_PARAMS = 18 * 1024
     };
 
     enum PartitionAddress
