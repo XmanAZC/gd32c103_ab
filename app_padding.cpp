@@ -30,6 +30,17 @@ static void _close(int sig)
     exit(0);
 }
 
+enum
+{
+    BOOTLOADER_INDEX = 0,
+    BOOTFROM_INDEX,
+    APP_A_INFO_INDEX,
+    APP_A_INDEX,
+    APP_B_INFO_INDEX,
+    APP_B_INDEX,
+    PARAMS_INDEX
+};
+
 struct padding_def
 {
     string path;
@@ -79,26 +90,26 @@ int main(int argc, char *const *argv)
 
             break;
         case 'l':
-            pads[0].path = optarg; // bootloader
+            pads[BOOTLOADER_INDEX].path = optarg; // bootloader
             break;
         case 'a':
-            pads[3].path = optarg; // appa
+            pads[APP_A_INDEX].path = optarg; // appa
             break;
         case 'b':
-            pads[5].path = optarg; // appb
+            pads[APP_B_INDEX].path = optarg; // appb
             break;
         case 'o':
             output_file = optarg;
             break;
         case 'p':
-            pads[6].path = optarg; // params
+            pads[PARAMS_INDEX].path = optarg; // params
             break;
         default:
             break;
         }
     }
 
-    if (pads[0].path.empty() || pads[3].path.empty() || pads[5].path.empty())
+    if (pads[BOOTLOADER_INDEX].path.empty() || pads[APP_A_INDEX].path.empty() || pads[APP_B_INDEX].path.empty())
     {
         usage();
         return -1;
@@ -141,34 +152,34 @@ int main(int argc, char *const *argv)
         close(pads[i].fd);
         printf("load %s size %ld bytes\n", pads[i].path.c_str(), read_bytes);
     }
-    BootFromInfo_p bootfrom_info = (BootFromInfo_p)pads[1].data.data();
+    BootFromInfo_p bootfrom_info = (BootFromInfo_p)pads[BOOTFROM_INDEX].data.data();
     bootfrom_info->magicNumber = PARTITION_MAGIC_NUMBER;
     bootfrom_info->activeApp = ACTIVE_APP_A;
     bootfrom_info->checksum = 0;
     // simple checksum: sum of all bytes
     uint32_t checksum = 0;
-    for (size_t i = 0; i < pads[1].size - sizeof(bootfrom_info->checksum); i++)
+    for (size_t i = 0; i < pads[BOOTFROM_INDEX].size - sizeof(bootfrom_info->checksum); i++)
     {
-        checksum += pads[1].data[i];
+        checksum += pads[BOOTFROM_INDEX].data[i];
     }
     bootfrom_info->checksum = checksum;
 
-    AppInfo_p appa_info = (AppInfo_p)pads[2].data.data();
+    AppInfo_p appa_info = (AppInfo_p)pads[APP_A_INFO_INDEX].data.data();
     appa_info->magicNumber = PARTITION_MAGIC_NUMBER;
     appa_info->version = 1;
-    appa_info->size_bytes = pads[3].size;
+    appa_info->size_bytes = pads[APP_A_INDEX].size;
     appa_info->commit_hash = 0;
-    appa_info->app_checksum = crc32_calculate(pads[3].data.data(), pads[3].size, 0);
+    appa_info->app_checksum = crc32_calculate(pads[APP_A_INDEX].data.data(), pads[APP_A_INDEX].size, 0);
     time_t now = time(NULL);
     localtime_r(&now, &tm);
     appa_info->compile_timestamp = (uint32_t)mktime(&tm);
 
-    AppInfo_p appb_info = (AppInfo_p)pads[4].data.data();
+    AppInfo_p appb_info = (AppInfo_p)pads[APP_B_INFO_INDEX].data.data();
     appb_info->magicNumber = PARTITION_MAGIC_NUMBER;
     appb_info->version = 1;
-    appb_info->size_bytes = pads[5].size;
+    appb_info->size_bytes = pads[APP_B_INDEX].size;
     appb_info->commit_hash = 0;
-    appb_info->app_checksum = crc32_calculate(pads[5].data.data(), pads[5].size, 0);
+    appb_info->app_checksum = crc32_calculate(pads[APP_B_INDEX].data.data(), pads[APP_B_INDEX].size, 0);
     appb_info->compile_timestamp = appa_info->compile_timestamp;
 
     int out_fd = open(output_file.c_str(), O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR);
@@ -179,6 +190,10 @@ int main(int argc, char *const *argv)
     }
     for (size_t i = 0; i < sizeof(pads) / sizeof(padding_def); i++)
     {
+        if (i == PARAMS_INDEX && pads[i].path.empty())
+        {
+            continue; // params is optional
+        }
         ssize_t write_bytes = write(out_fd, pads[i].data.data(), pads[i].size);
         if (write_bytes < 0 || (uint32_t)write_bytes != pads[i].size)
         {
