@@ -146,6 +146,7 @@ int upgrade_init(xlink_context_p context)
                                XLINK_COMP_ID_UPGRADE,
                                XLINK_UPGRADE_MSG_ID_FINALIZE_FIRMWARE_UPGRADE,
                                FinalizeFirmwareUpgrade_cb,
+
                                context);
     xlink_register_msg_handler(context,
                                XLINK_COMP_ID_UPGRADE,

@@ -159,7 +159,7 @@ extern "C"
     }
 #endif // PARTITION_CRC32
 
-#ifdef SOC_GD32C103CBT6
+#if defined(SOC_GD32C103CBT6) && defined(__arm__)
 #include "gd32c10x.h"
 
     static inline int check_app_valid(enum ActiveApp app)
@@ -208,7 +208,7 @@ extern "C"
         app_entry();             /* jump to app */
     }
 
-#endif /* SOC_GD32C103CBT6 */
+#endif /* defined(SOC_GD32C103CBT6) && defined(__arm__) */
 
 #ifdef __cplusplus
 }

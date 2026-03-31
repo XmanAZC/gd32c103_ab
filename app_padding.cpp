@@ -18,8 +18,11 @@ using namespace std;
 static void usage(void)
 {
     printf(
-        "Usage: bootloader-bin-path appa-bin-path appb-bin-path [params-bin-path]\n"
+        "Usage: -l bootloader-bin-path -a appa-bin-path -b appb-bin-path\n"
         "-s, --show             show bin file info\n"
+        "-o, --output           output file path, default full_firmware.bin\n"
+        "-v, --version          firmware version, default unknown\n"
+        "-c, --commit           firmware commit hash, default unknown\n"
         "-p, --params           params bin file path\n");
 }
 
@@ -51,7 +54,7 @@ struct padding_def
 
 int main(int argc, char *const *argv)
 {
-    static const char short_options[] = "hs:o:p:l:a:b:";
+    static const char short_options[] = "hs:o:p:l:a:b:v:c:";
     struct tm tm;
     static struct option long_options[] = {
         {"help", 0, 0, 'h'},
@@ -61,6 +64,8 @@ int main(int argc, char *const *argv)
         {"loader", 1, 0, 'l'},
         {"appa", 1, 0, 'a'},
         {"appb", 1, 0, 'b'},
+        {"version", 1, 0, 'v'},
+        {"commit", 1, 0, 'c'},
         {0, 0, 0, 0}};
 
     int c;
@@ -76,7 +81,9 @@ int main(int argc, char *const *argv)
         {.path = "", .size = PARTITION_SIZE_PARAMS}};
 
     signal(SIGINT, _close);
-    string output_file = "bootloader_full.bin";
+    string output_file = "full_firmware.bin";
+    string version_str = "unknown";
+    string commit_str = "unknown";
 
     while ((c = getopt_long(argc, argv, short_options, long_options, &option_index)) != -1)
     {
@@ -103,6 +110,12 @@ int main(int argc, char *const *argv)
             break;
         case 'p':
             pads[PARAMS_INDEX].path = optarg; // params
+            break;
+        case 'v':
+            version_str = optarg;
+            break;
+        case 'c':
+            commit_str = optarg;
             break;
         default:
             break;
@@ -166,9 +179,9 @@ int main(int argc, char *const *argv)
 
     AppInfo_p appa_info = (AppInfo_p)pads[APP_A_INFO_INDEX].data.data();
     appa_info->magicNumber = PARTITION_MAGIC_NUMBER;
-    appa_info->version = 1;
+    appa_info->version = version_str == "unknown" ? 0 : strtoul(version_str.c_str(), NULL, 16);
     appa_info->size_bytes = pads[APP_A_INDEX].size;
-    appa_info->commit_hash = 0;
+    appa_info->commit_hash = commit_str == "unknown" ? 0 : strtoul(commit_str.c_str(), NULL, 16);
     appa_info->app_checksum = crc32_calculate(pads[APP_A_INDEX].data.data(), pads[APP_A_INDEX].size, 0);
     time_t now = time(NULL);
     localtime_r(&now, &tm);
@@ -176,9 +189,9 @@ int main(int argc, char *const *argv)
 
     AppInfo_p appb_info = (AppInfo_p)pads[APP_B_INFO_INDEX].data.data();
     appb_info->magicNumber = PARTITION_MAGIC_NUMBER;
-    appb_info->version = 1;
+    appb_info->version = appa_info->version;
     appb_info->size_bytes = pads[APP_B_INDEX].size;
-    appb_info->commit_hash = 0;
+    appb_info->commit_hash = appa_info->commit_hash;
     appb_info->app_checksum = crc32_calculate(pads[APP_B_INDEX].data.data(), pads[APP_B_INDEX].size, 0);
     appb_info->compile_timestamp = appa_info->compile_timestamp;
 

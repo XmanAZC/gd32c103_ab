@@ -148,26 +148,11 @@ else()
         COMMAND ${CMAKE_SIZE} appb.elf
     )
 
-    set(APP_PADDING_TOOL ${CMAKE_CURRENT_BINARY_DIR}/app_padding)
-    set(MERGED_BIN ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.bin)
-
     add_custom_command(
-        OUTPUT ${APP_PADDING_TOOL}
-        COMMAND ${HOST_CXX_COMPILER} ${CMAKE_SOURCE_DIR}/app_padding.cpp -o ${APP_PADDING_TOOL}
+        OUTPUT app_padding_tool
+        COMMAND ${HOST_CXX_COMPILER} ${CMAKE_SOURCE_DIR}/app_padding.cpp -o app_padding_tool
         DEPENDS ${CMAKE_SOURCE_DIR}/app_padding.cpp ${CMAKE_SOURCE_DIR}/inc/partition.h
         COMMENT "Building host app_padding tool"
-        VERBATIM
-    )
-
-    add_custom_command(
-        OUTPUT ${MERGED_BIN}
-        COMMAND ${APP_PADDING_TOOL}
-            -l ${CMAKE_CURRENT_BINARY_DIR}/bootloader.bin
-            -a ${CMAKE_CURRENT_BINARY_DIR}/appa.bin
-            -b ${CMAKE_CURRENT_BINARY_DIR}/appb.bin
-            -o ${MERGED_BIN}
-        DEPENDS bootloader.elf appa.elf appb.elf ${APP_PADDING_TOOL}
-        COMMENT "Merging bootloader.bin, appa.bin and appb.bin into ${CMAKE_PROJECT_NAME}.bin"
         VERBATIM
     )
 
@@ -187,5 +172,6 @@ else()
 
     add_custom_target(upgrade_tool ALL DEPENDS upgrade)
 
-    add_custom_target(${CMAKE_PROJECT_NAME}_bin ALL DEPENDS ${MERGED_BIN})
+    add_custom_target(app_padding ALL DEPENDS app_padding_tool)
+
 endif()
