@@ -1,0 +1,25 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "cortex-debug",
+      "request": "launch",
+      "name": "Debug J-Link",
+      "cwd": "${workspaceRoot}",
+      "executable": "${workspaceRoot}/build/gd32c103_ab.elf",
+      // TODO: 可能路径并不一致，可以替换
+      "serverpath": "/usr/bin/JLinkGDBServerCLExe",
+      "serverArgs": ["-if", "SWD", "-select", "USB", "-device", "GD32C103CBT6", "-speed", "400"],
+      "servertype": "jlink",
+      "device": "GD32C103CBT6",
+      // TODO: 替换本地gdb路劲
+      "armToolchainPath": "/home/debian/software/gcc-arm-none-eabi-10.3-2021.10/bin",
+      "showDevDebugOutput": "raw",
+      "runToEntryPoint": "main",
+      "preLaunchTask": "build"
+    }
+  ]
+}
